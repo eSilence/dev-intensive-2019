@@ -28,28 +28,18 @@ Date.add
 Date().add(2, TimeUnits.SECOND) //Thu Jun 27 14:00:02 GST 2019
 Date().add(-4, TimeUnits.DAY) //Thu Jun 23 14:00:00 GST 2019
  */
-const val SECOND = 1000L
-const val MINUTE = 60 * SECOND
-const val HOUR = 60 * MINUTE
-const val DAY = 24 * HOUR
 
-enum class TimeUnits {
-    SECOND,
-    MINUTE,
-    HOUR,
-    DAY
-}
-
-fun Date.add(value:Int, units:TimeUnits = TimeUnits.SECOND):Date{
+fun Date.add(value:Long, units:TimeUnits = TimeUnits.SECOND):Date{
     var time = this.time
 
-    time += when(units) {
-        TimeUnits.SECOND -> value * SECOND
-        TimeUnits.MINUTE -> value * MINUTE
-        TimeUnits.HOUR -> value * HOUR
-        TimeUnits.DAY -> value * DAY
+        // time += when(units) {
+    val delt:Long = when(units) {
+        TimeUnits.SECOND -> value * TimeUnits.SECOND.value
+        TimeUnits.MINUTE -> value * TimeUnits.MINUTE.value
+        TimeUnits.HOUR -> value * TimeUnits.HOUR.value
+        TimeUnits.DAY -> value * TimeUnits.DAY.value
     }
-    this.time = time
+    this.time = time + delt
     return this
 }
 
@@ -78,48 +68,60 @@ Date().add(7, TimeUnits.DAY).humanizeDiff() //через 7 дней
 Date().add(-400, TimeUnits.DAY).humanizeDiff() //более года назад
 Date().add(400, TimeUnits.DAY).humanizeDiff() //более чем через год
  */
-fun minutes(num:Long):String{
-    if (num % 10 == 1L && num % 100 != 11L) return "минута"
-    if (num%10 > 1L && num%10 < 5L && !(num%100>11L && num %100<15L)) return "минуты"
-    return "минут"
-}
-fun hours(num:Long):String{
-    if (num % 10 == 1L && num % 100 != 11L) return "час"
-    if (num%10 > 1L && num%10 < 5L && !(num%100>11L && num %100<15L)) return "часа"
-    return "часов"
-}
-fun days(num:Long):String{
-    if (num % 10 == 1L && num % 100 != 11L) return "день"
-    if (num%10 > 1L && num%10 < 5L && !(num%100>11L && num %100<15L)) return "дня"
-    return "дней"
-}
 
 fun Date.humanizeDiff(nowDate:Date = Date()):String{
     var time = this.time
     var time2:Long = nowDate.time
     var dif = time2 - time
     var result:String
-    if (dif>0) {
-        if (dif > 0 && dif <= SECOND) result = "только что"
-        else if (dif > SECOND && dif <= 45 * SECOND) result = "несколько секунд назад"
-        else if (dif > 45 * SECOND && dif <= 75 * SECOND) result = "минуту назад"
-        else if (dif > 75 * SECOND && dif <= 45 * MINUTE) result = "${dif / MINUTE} ${minutes(dif / MINUTE)} назад"
-        else if (dif > 45 * MINUTE && dif <= 75 * MINUTE) result = "час назад"
-        else if (dif > 75 * MINUTE && dif <= 22 * HOUR) result = "${dif / HOUR} ${hours(dif / HOUR)} назад"
-        else if (dif > 22 * HOUR && dif <= 26 * HOUR) result = "день назад"
-        else if (dif > 26 * HOUR && dif <= 360 * DAY) result = "${dif / DAY} ${days(dif / DAY)} назад"
+    if (dif>=0) {
+        if (dif >= 0 && dif <= TimeUnits.SECOND.value) result = "только что"
+        else if (dif > TimeUnits.SECOND.value && dif <= 45 * TimeUnits.SECOND.value)     result = "несколько секунд назад"
+        else if (dif > 45 * TimeUnits.SECOND.value && dif <= 75 * TimeUnits.SECOND.value) result = "минуту назад"
+        else if (dif > 75 * TimeUnits.SECOND.value && dif <= 45 * TimeUnits.MINUTE.value) result = "${TimeUnits.MINUTE.plural(dif / TimeUnits.MINUTE.value)} назад"
+        else if (dif > 45 * TimeUnits.MINUTE.value && dif <= 75 * TimeUnits.MINUTE.value) result = "час назад"
+        else if (dif > 75 * TimeUnits.MINUTE.value && dif <= 22 * TimeUnits.HOUR.value) result = "${TimeUnits.HOUR.plural(dif / TimeUnits.HOUR.value)} назад"
+        else if (dif > 22 * TimeUnits.HOUR.value && dif <= 26 * TimeUnits.HOUR.value) result = "день назад"
+        else if (dif > 26 * TimeUnits.HOUR.value && dif <= 360 * TimeUnits.DAY.value) result = "${TimeUnits.DAY.plural(dif / TimeUnits.DAY.value)} назад"
         else result = "более года назад"
     }else{
         dif = -dif
-        if (dif > 0 && dif <= SECOND) result = "только что"
-        else if (dif > SECOND && dif <= 45 * SECOND) result = "через несколько секунд"
-        else if (dif > 45 * SECOND && dif <= 75 * SECOND) result = "через минуту"
-        else if (dif > 75 * SECOND && dif <= 45 * MINUTE) result = "через ${dif / MINUTE} ${minutes(dif / MINUTE)}"
-        else if (dif > 45 * MINUTE && dif <= 75 * MINUTE) result = "через час"
-        else if (dif > 75 * MINUTE && dif <= 22 * HOUR) result = "через ${dif / HOUR} ${hours(dif / HOUR)}"
-        else if (dif > 22 * HOUR && dif <= 26 * HOUR) result = "через день"
-        else if (dif > 26 * HOUR && dif <= 360 * DAY) result = "через ${dif / DAY} ${days(dif / DAY)}"
+        if (dif > 0 && dif <= TimeUnits.SECOND.value) result = "только что"
+        else if (dif > TimeUnits.SECOND.value && dif <= 45 * TimeUnits.SECOND.value) result = "через несколько секунд"
+        else if (dif > 45 * TimeUnits.SECOND.value && dif <= 75 * TimeUnits.SECOND.value) result = "через минуту"
+        else if (dif > 75 * TimeUnits.SECOND.value && dif <= 45 * TimeUnits.MINUTE.value) result = "через ${TimeUnits.MINUTE.plural(dif / TimeUnits.MINUTE.value)}"
+        else if (dif > 45 * TimeUnits.MINUTE.value && dif <= 75 * TimeUnits.MINUTE.value) result = "через час"
+        else if (dif > 75 * TimeUnits.MINUTE.value && dif <= 22 * TimeUnits.HOUR.value) result = "через ${TimeUnits.HOUR.plural(dif / TimeUnits.HOUR.value)}"
+        else if (dif > 22 * TimeUnits.HOUR.value && dif <= 26 * TimeUnits.HOUR.value) result = "через день"
+        else if (dif > 26 * TimeUnits.HOUR.value && dif <= 360 * TimeUnits.DAY.value) result = "через ${TimeUnits.DAY.plural(dif / TimeUnits.DAY.value)}"
         else result = "более чем через год"
     }
     return  result
     }
+/*
+**plural
+Необходимо реализовать метод plural для enum TimeUnits
++2
+Реализуй метод plural для всех перечислений TimeUnits следующего вида TimeUnits.SECOND.plural(value:Int) возвращающую значение в виде строки с праильно склоненной единицой измерения
+Пример:
+TimeUnits.SECOND.plural(1) //1 секунду
+TimeUnits.MINUTE.plural(4) //4 минуты
+TimeUnits.HOUR.plural(19) //19 часов
+TimeUnits.DAY.plural(222) //222 дня
+ */
+
+enum class TimeUnits (
+        val value:Long,
+        val one:String="секунду",  val few: String="секунды",  val many:String= "секунд") {
+
+    SECOND(1000L ),
+    MINUTE(60L * SECOND.value,"минуту", "минуты", "минут" ),
+    HOUR(60L * MINUTE.value,"час", "часа", "часов"),
+    DAY(24L * HOUR.value, "день", "дня", "дней");
+
+    fun plural(num:Long):String{
+        if (num % 10 == 1L && num % 100 != 11L) return "$num $one"
+        if (num%10 > 1L && num%10 < 5L && !(num%100>11L && num %100<15L)) return "$num $few"
+        return "$num $many"
+    }
+}
